@@ -16,6 +16,8 @@ let markers       = {};         // carId → L.Marker
 let pendingLatLng = null;       // click-on-map coordinates pending confirmation
 let editingCarId  = null;       // car being edited in modal
 let unsubCars     = null;
+let panelOpen     = true;       // panel visibility state
+let searchDebounce = null;      // debounce timer for street search
 
 const CAR_COLORS = [
   "#3b82f6", "#ef4444", "#22c55e", "#f59e0b",
@@ -44,7 +46,7 @@ function initApp() {
 //  Map
 // ─────────────────────────────────────────────────────────
 function initMap() {
-  map = L.map("map", { zoomControl: true }).setView([40.416, -3.703], 6);
+  map = L.map("map", { zoomControl: false }).setView([40.416, -3.703], 6);
 
   L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> © <a href="https://carto.com/">CARTO</a>',
@@ -104,7 +106,6 @@ function buildPopup(car) {
 }
 
 function refreshMarkers() {
-  // Remove old markers
   Object.values(markers).forEach((m) => m && m.remove());
   markers = {};
   cars.forEach((car) => {
@@ -115,13 +116,95 @@ function refreshMarkers() {
 }
 
 // ─────────────────────────────────────────────────────────
+//  Panel toggle
+// ─────────────────────────────────────────────────────────
+function togglePanel() {
+  panelOpen = !panelOpen;
+  const panel     = document.getElementById("panel");
+  const toggle    = document.getElementById("panel-toggle");
+  const container = document.getElementById("map-container");
+
+  panel.classList.toggle("collapsed", !panelOpen);
+  toggle.classList.toggle("collapsed", !panelOpen);
+  container.classList.toggle("panel-hidden", !panelOpen);
+
+  // Let map recalculate its size after CSS transition
+  setTimeout(() => map.invalidateSize(), 310);
+}
+
+// ─────────────────────────────────────────────────────────
+//  Street search
+// ─────────────────────────────────────────────────────────
+function initSearch() {
+  const input   = document.getElementById("search-input");
+  const results = document.getElementById("search-results");
+
+  input.addEventListener("input", () => {
+    clearTimeout(searchDebounce);
+    const q = input.value.trim();
+    if (!q) { results.classList.add("hidden"); return; }
+
+    searchDebounce = setTimeout(() => doSearch(q), 400);
+  });
+
+  // Close results when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#map-search")) {
+      results.classList.add("hidden");
+    }
+  });
+
+  // Prevent map click from firing when clicking the search widget
+  document.getElementById("map-search").addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
+}
+
+async function doSearch(query) {
+  const results = document.getElementById("search-results");
+  results.innerHTML = `<div class="map-search-spinner">Buscando...</div>`;
+  results.classList.remove("hidden");
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`;
+    const res  = await fetch(url, { headers: { "Accept-Language": "es" } });
+    const data = await res.json();
+
+    if (!data.length) {
+      results.innerHTML = `<div class="map-search-spinner">Sin resultados.</div>`;
+      return;
+    }
+
+    results.innerHTML = "";
+    data.forEach((place) => {
+      const item = document.createElement("div");
+      item.className = "map-search-result";
+
+      // Build a short display name: first part before the first comma
+      const parts = place.display_name.split(",");
+      const title = parts[0].trim();
+      const sub   = parts.slice(1, 3).join(",").trim();
+
+      item.innerHTML = `<strong>${escHtml(title)}</strong>${sub ? escHtml(sub) : ""}`;
+      item.addEventListener("click", () => {
+        map.flyTo([parseFloat(place.lat), parseFloat(place.lon)], 16, { duration: 1.2 });
+        document.getElementById("search-input").value = title;
+        results.classList.add("hidden");
+      });
+      results.appendChild(item);
+    });
+  } catch {
+    results.innerHTML = `<div class="map-search-spinner">Error al buscar. Comprueba tu conexión.</div>`;
+  }
+}
+
+// ─────────────────────────────────────────────────────────
 //  Cars (Firestore listener)
 // ─────────────────────────────────────────────────────────
 function listenToCars() {
   if (unsubCars) unsubCars();
   unsubCars = listenCars(currentUser.uid, (updatedCars) => {
     cars = updatedCars.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-    // Keep selectedCarId valid
     if (selectedCarId && !cars.find((c) => c.id === selectedCarId)) {
       selectedCarId = cars[0]?.id || null;
     }
@@ -164,7 +247,6 @@ function renderCarsList() {
 }
 
 function renderParkingInfo() {
-  const sec  = document.getElementById("parking-section");
   const info = document.getElementById("parking-info");
   const car  = cars.find((c) => c.id === selectedCarId);
 
@@ -208,6 +290,9 @@ function updateSaveBtn() {
 //  UI bindings
 // ─────────────────────────────────────────────────────────
 function bindUI() {
+  // Panel toggle
+  document.getElementById("panel-toggle").addEventListener("click", togglePanel);
+
   // Car list click (select or edit)
   document.getElementById("cars-list").addEventListener("click", (e) => {
     const editId = e.target.closest("[data-edit]")?.dataset.edit;
@@ -218,7 +303,6 @@ function bindUI() {
     renderCarsList();
     renderParkingInfo();
     updateSaveBtn();
-    // Fly to car if parked
     const car = cars.find((c) => c.id === selectedCarId);
     if (car?.parking) map.flyTo([car.parking.lat, car.parking.lng], 16, { duration: 1 });
   });
@@ -257,6 +341,9 @@ function bindUI() {
   document.getElementById("confirm-modal-overlay").addEventListener("click", (e) => {
     if (e.target === e.currentTarget) closeConfirmModal();
   });
+
+  // Street search
+  initSearch();
 }
 
 // ─────────────────────────────────────────────────────────
@@ -271,10 +358,9 @@ function openCarModal(carId) {
   document.getElementById("modal-error").classList.add("hidden");
   document.getElementById("modal-delete-btn").style.display = car ? "block" : "none";
 
-  // Build color picker
   const picker = document.getElementById("color-picker");
   picker.innerHTML = "";
-  const usedColors = cars.filter((c) => c.id !== carId).map((c) => c.color);
+  const usedColors   = cars.filter((c) => c.id !== carId).map((c) => c.color);
   const defaultColor = car?.color || CAR_COLORS.find((c) => !usedColors.includes(c)) || CAR_COLORS[0];
 
   CAR_COLORS.forEach((color) => {
@@ -347,14 +433,12 @@ async function openConfirmModal(lat, lng) {
   document.getElementById("confirm-address").textContent  = "Obteniendo dirección...";
   document.getElementById("confirm-modal-overlay").classList.remove("hidden");
 
-  // Show temp marker on map
   if (markers["_pending"]) markers["_pending"].remove();
   markers["_pending"] = L.circleMarker([lat, lng], {
     radius: 8, color: car?.color || "#3b82f6", fillColor: car?.color || "#3b82f6", fillOpacity: 0.5,
   }).addTo(map);
   map.panTo([lat, lng]);
 
-  // Get address async
   const address = await reverseGeocode(lat, lng);
   document.getElementById("confirm-address").textContent = address;
   pendingLatLng.address = address;
