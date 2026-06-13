@@ -311,7 +311,6 @@ function bindUI() {
   const closeLogoutModal = () => document.getElementById("logout-modal-overlay").classList.add("hidden");
 
   document.getElementById("logout-btn").addEventListener("click", openLogoutModal);
-  document.getElementById("logout-btn-mobile").addEventListener("click", openLogoutModal);
   document.getElementById("logout-modal-close").addEventListener("click", closeLogoutModal);
   document.getElementById("logout-cancel-btn").addEventListener("click", closeLogoutModal);
   document.getElementById("logout-modal-overlay").addEventListener("click", (e) => {

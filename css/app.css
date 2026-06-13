@@ -441,19 +441,6 @@ html, body {
 
 /* ─── MAP OVERLAY ELEMENTS ────────────────────────────── */
 
-.mobile-topbar {
-  display: none;
-  position: absolute;
-  top: 12px; left: 12px; right: 12px;
-  z-index: 500;
-  background: rgba(26, 29, 39, 0.95);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 14px;
-  align-items: center;
-  justify-content: space-between;
-}
 
 .map-hint {
   position: absolute;
@@ -831,9 +818,6 @@ html, body {
     transform: rotate(-90deg);
   }
 
-  .mobile-topbar {
-    display: flex;
-  }
 
   .map-hint {
     bottom: 16px;
