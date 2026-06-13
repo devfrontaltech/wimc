@@ -794,10 +794,9 @@ html, body {
     transform: translateY(100%);
   }
 
-  /* map-container llega hasta el borde del panel, sin hueco */
   .map-container {
     left: 0;
-    bottom: calc(55vh - 20px); /* -20px = border-radius del panel, elimina el gap */
+    bottom: 55vh;
     transition: bottom 0.3s ease;
   }
 
@@ -805,11 +804,16 @@ html, body {
     bottom: 0;
   }
 
-  /* La lengueta se sitúa justo encima del panel, pegada a él */
+  /* Sube 20px (= border-radius) para cubrir el hueco negro */
+  .panel {
+    bottom: -20px;
+    padding-bottom: 20px;
+  }
+
   .panel-toggle {
     top: auto;
     left: 50% !important;
-    bottom: calc(55vh - 20px);
+    bottom: 55vh;
     transform: translateX(-50%);
     width: 52px;
     height: 22px;
