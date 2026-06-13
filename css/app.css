@@ -39,7 +39,7 @@ html, body {
 #map {
   width: 100%;
   height: 100%;
-  background: #1a1d27;
+  background: #e8e8e8;
 }
 
 /* ─── PANEL ───────────────────────────────────────────── */
@@ -94,9 +94,6 @@ html, body {
   left: 0;
 }
 
-/* Arrow: panel open → points left (‹), panel closed → points right (›).
-   The SVG polyline is "15 18 9 12 15 6" which draws ‹.
-   When collapsed we rotate 180deg so it becomes ›. */
 .panel-toggle svg {
   transition: transform 0.3s ease;
   flex-shrink: 0;
@@ -312,6 +309,7 @@ html, body {
   flex-shrink: 0;
 }
 
+/* ── Edit button: always visible ── */
 .car-edit-btn {
   background: none;
   border: none;
@@ -321,11 +319,14 @@ html, body {
   border-radius: 4px;
   display: flex;
   align-items: center;
-  opacity: 0;
-  transition: opacity 0.15s;
+  opacity: 0.5;
+  transition: opacity 0.15s, color 0.15s;
 }
 
-.car-item:hover .car-edit-btn { opacity: 1; }
+.car-edit-btn:hover {
+  opacity: 1;
+  color: var(--text);
+}
 
 .btn-add-car {
   width: 100%;
@@ -683,7 +684,7 @@ html, body {
 /* ─── LEAFLET CUSTOM ──────────────────────────────────── */
 
 .leaflet-container {
-  background: #1a1d27 !important;
+  background: #e8e8e8 !important;
 }
 
 .leaflet-control-zoom {
@@ -699,7 +700,7 @@ html, body {
   height: 28px;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
-  border: 3px solid rgba(255,255,255,0.3);
+  border: 3px solid rgba(255,255,255,0.6);
   position: relative;
 }
 
@@ -708,7 +709,7 @@ html, body {
   position: absolute;
   width: 8px;
   height: 8px;
-  background: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.9);
   border-radius: 50%;
   top: 50%;
   left: 50%;
@@ -803,7 +804,6 @@ html, body {
     bottom: 0;
   }
 
-  /* Mobile toggle: pill sitting on top edge of bottom sheet */
   .panel-toggle {
     top: auto;
     left: 50% !important;
@@ -821,7 +821,6 @@ html, body {
     bottom: 0;
   }
 
-  /* In mobile the arrow points down (open) / up (collapsed) */
   .panel-toggle svg {
     transform: rotate(90deg);
   }

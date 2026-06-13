@@ -48,7 +48,8 @@ function initApp() {
 function initMap() {
   map = L.map("map", { zoomControl: false }).setView([40.416, -3.703], 6);
 
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+  // Light tiles — much easier to read
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> © <a href="https://carto.com/">CARTO</a>',
     maxZoom: 19,
   }).addTo(map);
@@ -141,7 +142,6 @@ function initSearch() {
     searchDebounce = setTimeout(() => doSearch(q), 400);
   });
 
-  // Clear results when input is cleared with keyboard shortcut / programmatically
   input.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       input.value = "";
@@ -226,7 +226,7 @@ function renderCarsList() {
       <span class="car-dot" style="background:${car.color};color:${car.color}"></span>
       <span class="car-name">${escHtml(car.name)}</span>
       ${car.parking ? '<span class="car-parked-badge">aparcado</span>' : ""}
-      <button class="car-edit-btn" title="Editar" data-edit="${car.id}">
+      <button class="car-edit-btn" title="Editar coche" data-edit="${car.id}">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -306,9 +306,21 @@ function bindUI() {
     );
   });
 
-  const doLogout = () => { if (unsubCars) unsubCars(); logoutUser(); };
-  document.getElementById("logout-btn").addEventListener("click", doLogout);
-  document.getElementById("logout-btn-mobile").addEventListener("click", doLogout);
+  // Logout — opens confirmation modal instead of acting directly
+  const openLogoutModal = () => document.getElementById("logout-modal-overlay").classList.remove("hidden");
+  const closeLogoutModal = () => document.getElementById("logout-modal-overlay").classList.add("hidden");
+
+  document.getElementById("logout-btn").addEventListener("click", openLogoutModal);
+  document.getElementById("logout-btn-mobile").addEventListener("click", openLogoutModal);
+  document.getElementById("logout-modal-close").addEventListener("click", closeLogoutModal);
+  document.getElementById("logout-cancel-btn").addEventListener("click", closeLogoutModal);
+  document.getElementById("logout-modal-overlay").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeLogoutModal();
+  });
+  document.getElementById("logout-confirm-btn").addEventListener("click", () => {
+    if (unsubCars) unsubCars();
+    logoutUser();
+  });
 
   document.getElementById("modal-close").addEventListener("click", closeCarModal);
   document.getElementById("car-modal-overlay").addEventListener("click", (e) => {

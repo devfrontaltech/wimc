@@ -136,6 +136,23 @@
     </div>
   </div>
 
+  <!-- MODAL: Confirmar cierre de sesión -->
+  <div class="modal-overlay hidden" id="logout-modal-overlay">
+    <div class="modal" id="logout-modal">
+      <div class="modal-header">
+        <h2>Cerrar sesión</h2>
+        <button class="btn-icon" id="logout-modal-close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <p>¿Seguro que quieres cerrar sesión?</p>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="logout-cancel-btn">Cancelar</button>
+        <button class="btn-primary" id="logout-confirm-btn">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="js/app.js"></script>
 </body>
