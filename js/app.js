@@ -8,16 +8,16 @@ import {
 // ─────────────────────────────────────────────────────────
 //  State
 // ─────────────────────────────────────────────────────────
-let currentUser   = null;
-let cars          = [];         // [{id, name, color, parking}]
-let selectedCarId = null;
-let map           = null;
-let markers       = {};         // carId → L.Marker
-let pendingLatLng = null;       // click-on-map coordinates pending confirmation
-let editingCarId  = null;       // car being edited in modal
-let unsubCars     = null;
-let panelOpen     = true;       // panel visibility state
-let searchDebounce = null;      // debounce timer for street search
+let currentUser    = null;
+let cars           = [];
+let selectedCarId  = null;
+let map            = null;
+let markers        = {};
+let pendingLatLng  = null;
+let editingCarId   = null;
+let unsubCars      = null;
+let panelOpen      = true;
+let searchDebounce = null;
 
 const CAR_COLORS = [
   "#3b82f6", "#ef4444", "#22c55e", "#f59e0b",
@@ -53,7 +53,6 @@ function initMap() {
     maxZoom: 19,
   }).addTo(map);
 
-  // Geolocation on load
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 15),
@@ -62,7 +61,6 @@ function initMap() {
     );
   }
 
-  // Click on map → park here
   map.on("click", (e) => {
     if (!selectedCarId) {
       showHint("Selecciona primero un coche en el panel.");
@@ -83,8 +81,8 @@ function makeMarker(car) {
     popupAnchor:[0, -34],
     html: `
       <div class="custom-pin">
-        <div class="pin-pulse"  style="background:${car.color}40;"></div>
-        <div class="pin-body"   style="background:${car.color};"></div>
+        <div class="pin-pulse" style="background:${car.color}40;"></div>
+        <div class="pin-body"  style="background:${car.color};"></div>
       </div>`,
   });
 
@@ -109,9 +107,7 @@ function refreshMarkers() {
   Object.values(markers).forEach((m) => m && m.remove());
   markers = {};
   cars.forEach((car) => {
-    if (car.parking) {
-      markers[car.id] = makeMarker(car);
-    }
+    if (car.parking) markers[car.id] = makeMarker(car);
   });
 }
 
@@ -128,12 +124,11 @@ function togglePanel() {
   toggle.classList.toggle("collapsed", !panelOpen);
   container.classList.toggle("panel-hidden", !panelOpen);
 
-  // Let map recalculate its size after CSS transition
   setTimeout(() => map.invalidateSize(), 310);
 }
 
 // ─────────────────────────────────────────────────────────
-//  Street search
+//  Street search (inside panel)
 // ─────────────────────────────────────────────────────────
 function initSearch() {
   const input   = document.getElementById("search-input");
@@ -142,45 +137,40 @@ function initSearch() {
   input.addEventListener("input", () => {
     clearTimeout(searchDebounce);
     const q = input.value.trim();
-    if (!q) { results.classList.add("hidden"); return; }
-
+    if (!q) { results.classList.add("hidden"); results.innerHTML = ""; return; }
     searchDebounce = setTimeout(() => doSearch(q), 400);
   });
 
-  // Close results when clicking outside
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest("#map-search")) {
+  // Clear results when input is cleared with keyboard shortcut / programmatically
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      input.value = "";
       results.classList.add("hidden");
+      results.innerHTML = "";
     }
-  });
-
-  // Prevent map click from firing when clicking the search widget
-  document.getElementById("map-search").addEventListener("click", (e) => {
-    e.stopPropagation();
   });
 }
 
 async function doSearch(query) {
   const results = document.getElementById("search-results");
-  results.innerHTML = `<div class="map-search-spinner">Buscando...</div>`;
+  results.innerHTML = `<div class="panel-search-spinner">Buscando...</div>`;
   results.classList.remove("hidden");
 
   try {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`;
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=10&addressdetails=1`;
     const res  = await fetch(url, { headers: { "Accept-Language": "es" } });
     const data = await res.json();
 
     if (!data.length) {
-      results.innerHTML = `<div class="map-search-spinner">Sin resultados.</div>`;
+      results.innerHTML = `<div class="panel-search-spinner">Sin resultados.</div>`;
       return;
     }
 
     results.innerHTML = "";
     data.forEach((place) => {
       const item = document.createElement("div");
-      item.className = "map-search-result";
+      item.className = "panel-search-result";
 
-      // Build a short display name: first part before the first comma
       const parts = place.display_name.split(",");
       const title = parts[0].trim();
       const sub   = parts.slice(1, 3).join(",").trim();
@@ -194,7 +184,7 @@ async function doSearch(query) {
       results.appendChild(item);
     });
   } catch {
-    results.innerHTML = `<div class="map-search-spinner">Error al buscar. Comprueba tu conexión.</div>`;
+    results.innerHTML = `<div class="panel-search-spinner">Error al buscar. Comprueba tu conexión.</div>`;
   }
 }
 
@@ -282,18 +272,15 @@ function renderParkingInfo() {
 }
 
 function updateSaveBtn() {
-  const btn = document.getElementById("save-gps-btn");
-  btn.disabled = !selectedCarId;
+  document.getElementById("save-gps-btn").disabled = !selectedCarId;
 }
 
 // ─────────────────────────────────────────────────────────
 //  UI bindings
 // ─────────────────────────────────────────────────────────
 function bindUI() {
-  // Panel toggle
   document.getElementById("panel-toggle").addEventListener("click", togglePanel);
 
-  // Car list click (select or edit)
   document.getElementById("cars-list").addEventListener("click", (e) => {
     const editId = e.target.closest("[data-edit]")?.dataset.edit;
     if (editId) { openCarModal(editId); return; }
@@ -307,10 +294,8 @@ function bindUI() {
     if (car?.parking) map.flyTo([car.parking.lat, car.parking.lng], 16, { duration: 1 });
   });
 
-  // Add car
   document.getElementById("add-car-btn").addEventListener("click", () => openCarModal(null));
 
-  // GPS save
   document.getElementById("save-gps-btn").addEventListener("click", () => {
     if (!selectedCarId) return;
     if (!navigator.geolocation) { alert("Tu navegador no soporta geolocalización."); return; }
@@ -321,12 +306,10 @@ function bindUI() {
     );
   });
 
-  // Logout
   const doLogout = () => { if (unsubCars) unsubCars(); logoutUser(); };
   document.getElementById("logout-btn").addEventListener("click", doLogout);
   document.getElementById("logout-btn-mobile").addEventListener("click", doLogout);
 
-  // Car modal
   document.getElementById("modal-close").addEventListener("click", closeCarModal);
   document.getElementById("car-modal-overlay").addEventListener("click", (e) => {
     if (e.target === e.currentTarget) closeCarModal();
@@ -334,7 +317,6 @@ function bindUI() {
   document.getElementById("modal-save-btn").addEventListener("click", saveCarModal);
   document.getElementById("modal-delete-btn").addEventListener("click", deleteCarModal);
 
-  // Confirm modal
   document.getElementById("confirm-modal-close").addEventListener("click", closeConfirmModal);
   document.getElementById("confirm-cancel-btn").addEventListener("click", closeConfirmModal);
   document.getElementById("confirm-save-btn").addEventListener("click", confirmSaveParking);
@@ -342,7 +324,6 @@ function bindUI() {
     if (e.target === e.currentTarget) closeConfirmModal();
   });
 
-  // Street search
   initSearch();
 }
 
@@ -358,7 +339,7 @@ function openCarModal(carId) {
   document.getElementById("modal-error").classList.add("hidden");
   document.getElementById("modal-delete-btn").style.display = car ? "block" : "none";
 
-  const picker = document.getElementById("color-picker");
+  const picker     = document.getElementById("color-picker");
   picker.innerHTML = "";
   const usedColors   = cars.filter((c) => c.id !== carId).map((c) => c.color);
   const defaultColor = car?.color || CAR_COLORS.find((c) => !usedColors.includes(c)) || CAR_COLORS[0];
@@ -405,7 +386,7 @@ async function saveCarModal() {
       selectedCarId = newId;
     }
     closeCarModal();
-  } catch (err) {
+  } catch {
     errEl.textContent = "Error al guardar. Inténtalo de nuevo.";
     errEl.classList.remove("hidden");
   } finally {
@@ -464,7 +445,7 @@ async function confirmSaveParking() {
       pendingLatLng.address || ""
     );
     closeConfirmModal();
-  } catch (err) {
+  } catch {
     alert("Error al guardar. Comprueba tu conexión.");
   } finally {
     btn.disabled = false; btn.textContent = "Guardar";

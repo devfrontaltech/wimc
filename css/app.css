@@ -70,12 +70,12 @@ html, body {
   left: var(--panel-w);
   transform: translateY(-50%);
   z-index: 1001;
-  width: 22px;
-  height: 48px;
+  width: 18px;
+  height: 64px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-left: none;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 10px 10px 0;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -92,10 +92,11 @@ html, body {
 
 .panel-toggle.collapsed {
   left: 0;
-  border-left: 1px solid var(--border);
-  border-radius: 0 8px 8px 0;
 }
 
+/* Arrow: panel open → points left (‹), panel closed → points right (›).
+   The SVG polyline is "15 18 9 12 15 6" which draws ‹.
+   When collapsed we rotate 180deg so it becomes ›. */
 .panel-toggle svg {
   transition: transform 0.3s ease;
   flex-shrink: 0;
@@ -127,6 +128,99 @@ html, body {
 .brand-small-name {
   letter-spacing: -0.3px;
 }
+
+/* ─── PANEL SEARCH ────────────────────────────────────── */
+
+.panel-search {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.panel-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.panel-search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.panel-search-input {
+  width: 100%;
+  padding: 8px 10px 8px 32px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.panel-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.panel-search-input:focus {
+  border-color: var(--accent);
+}
+
+.panel-search-results {
+  margin-top: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-search-result {
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  line-height: 1.4;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.panel-search-result:last-child {
+  border-bottom: none;
+}
+
+.panel-search-result:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.panel-search-result strong {
+  display: block;
+  color: var(--text);
+  font-weight: 500;
+  margin-bottom: 1px;
+  font-size: 13px;
+}
+
+.panel-search-spinner {
+  padding: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ─── PANEL SECTIONS ──────────────────────────────────── */
 
 .panel-section {
   padding: 18px 14px 14px;
@@ -343,101 +437,6 @@ html, body {
 .btn-save-parking:hover:not(:disabled) { background: var(--accent-hover); }
 .btn-save-parking:active:not(:disabled) { transform: scale(0.98); }
 .btn-save-parking:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* ─── STREET SEARCH ───────────────────────────────────── */
-
-.map-search {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 500;
-  width: 260px;
-}
-
-.map-search-input-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.map-search-icon {
-  position: absolute;
-  left: 10px;
-  color: var(--text-muted);
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-}
-
-.map-search-input {
-  width: 100%;
-  padding: 9px 12px 9px 34px;
-  background: rgba(26,29,39,0.96);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.map-search-input::placeholder {
-  color: var(--text-muted);
-}
-
-.map-search-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
-}
-
-.map-search-results {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  background: rgba(26,29,39,0.98);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-}
-
-.map-search-result {
-  padding: 9px 12px;
-  font-size: 12px;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: background 0.12s, color 0.12s;
-  line-height: 1.4;
-  border-bottom: 1px solid var(--border);
-}
-
-.map-search-result:last-child {
-  border-bottom: none;
-}
-
-.map-search-result:hover {
-  background: var(--surface2);
-  color: var(--text);
-}
-
-.map-search-result strong {
-  display: block;
-  color: var(--text);
-  font-weight: 500;
-  margin-bottom: 1px;
-  font-size: 13px;
-}
-
-.map-search-spinner {
-  padding: 10px 12px;
-  font-size: 12px;
-  color: var(--text-muted);
-  text-align: center;
-}
 
 /* ─── MAP OVERLAY ELEMENTS ────────────────────────────── */
 
@@ -687,7 +686,6 @@ html, body {
   background: #1a1d27 !important;
 }
 
-/* Hide default zoom controls */
 .leaflet-control-zoom {
   display: none !important;
 }
@@ -788,7 +786,6 @@ html, body {
     border-radius: 20px 20px 0 0;
     z-index: 1000;
     overflow-y: auto;
-    /* Mobile collapse: slide down */
     transition: transform 0.3s ease;
   }
 
@@ -798,7 +795,7 @@ html, body {
 
   .map-container {
     left: 0;
-    bottom: 45vh;
+    bottom: 55vh;
     transition: bottom 0.3s ease;
   }
 
@@ -806,15 +803,15 @@ html, body {
     bottom: 0;
   }
 
-  /* Mobile toggle: pill at bottom center above panel */
+  /* Mobile toggle: pill sitting on top edge of bottom sheet */
   .panel-toggle {
     top: auto;
     left: 50% !important;
     bottom: 55vh;
     transform: translateX(-50%);
-    width: 48px;
-    height: 22px;
-    border-radius: 8px 8px 0 0;
+    width: 52px;
+    height: 20px;
+    border-radius: 6px 6px 0 0;
     border: 1px solid var(--border);
     border-bottom: none;
     transition: bottom 0.3s ease, background 0.15s;
@@ -822,10 +819,9 @@ html, body {
 
   .panel-toggle.collapsed {
     bottom: 0;
-    border-radius: 8px 8px 0 0;
-    border-left: 1px solid var(--border);
   }
 
+  /* In mobile the arrow points down (open) / up (collapsed) */
   .panel-toggle svg {
     transform: rotate(90deg);
   }
@@ -839,20 +835,11 @@ html, body {
   }
 
   .map-hint {
-    bottom: calc(45vh + 12px);
+    bottom: calc(55vh + 12px);
   }
 
-  .map-search {
-    top: auto;
-    bottom: calc(55vh + 14px);
-    right: 14px;
-    left: 14px;
-    width: auto;
-  }
-
-  .map-search-results {
-    bottom: calc(100% + 6px);
-    top: auto;
+  .panel-search-results {
+    max-height: 160px;
   }
 }
 

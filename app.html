@@ -23,11 +23,28 @@
       </button>
     </div>
 
+    <!-- Street search — inside the panel -->
+    <div class="panel-search" id="panel-search-wrap">
+      <div class="panel-search-wrap">
+        <span class="panel-search-icon">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </span>
+        <input
+          type="text"
+          id="search-input"
+          class="panel-search-input"
+          placeholder="Buscar calle o lugar..."
+          autocomplete="off"
+        />
+      </div>
+      <div class="panel-search-results hidden" id="search-results"></div>
+    </div>
+
     <div class="panel-section">
       <div class="section-label">Mis coches</div>
-      <div id="cars-list" class="cars-list">
-        <!-- cars rendered here -->
-      </div>
+      <div id="cars-list" class="cars-list"></div>
       <button class="btn-add-car" id="add-car-btn">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Añadir coche
@@ -49,9 +66,9 @@
     </div>
   </aside>
 
-  <!-- PANEL TOGGLE BUTTON -->
+  <!-- PANEL TOGGLE — lateral tab on desktop, pill on mobile -->
   <button class="panel-toggle" id="panel-toggle" title="Mostrar/ocultar panel">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
       <polyline points="15 18 9 12 15 6"/>
     </svg>
   </button>
@@ -59,25 +76,6 @@
   <!-- MAP -->
   <main class="map-container" id="map-container">
     <div id="map"></div>
-
-    <!-- Street search -->
-    <div class="map-search" id="map-search">
-      <div class="map-search-input-wrap">
-        <span class="map-search-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-        </span>
-        <input
-          type="text"
-          id="search-input"
-          class="map-search-input"
-          placeholder="Buscar calle o lugar..."
-          autocomplete="off"
-        />
-      </div>
-      <div class="map-search-results hidden" id="search-results"></div>
-    </div>
 
     <!-- Mobile top bar -->
     <div class="mobile-topbar">
@@ -110,9 +108,7 @@
       </div>
       <div class="field">
         <label>Color en el mapa</label>
-        <div class="color-picker" id="color-picker">
-          <!-- colors rendered by JS -->
-        </div>
+        <div class="color-picker" id="color-picker"></div>
       </div>
       <div id="modal-error" class="error-msg hidden"></div>
       <div class="modal-actions">
@@ -122,7 +118,7 @@
     </div>
   </div>
 
-  <!-- MODAL: Confirmar aparcamiento por click en mapa -->
+  <!-- MODAL: Confirmar aparcamiento -->
   <div class="modal-overlay hidden" id="confirm-modal-overlay">
     <div class="modal" id="confirm-modal">
       <div class="modal-header">
