@@ -780,11 +780,11 @@ html, body {
     top: auto;
     left: 0; right: 0; bottom: 0;
     width: 100%;
-    height: auto;
+    height: 55vh;
     max-height: 55vh;
     border-right: none;
     border-top: 1px solid var(--border);
-    border-radius: 20px 20px 0 0;
+    border-radius: 0;
     z-index: 1000;
     overflow-y: auto;
     transition: transform 0.3s ease;
@@ -802,12 +802,6 @@ html, body {
 
   .map-container.panel-hidden {
     bottom: 0;
-  }
-
-  /* Sube 20px (= border-radius) para cubrir el hueco negro */
-  .panel {
-    bottom: -20px;
-    padding-bottom: 20px;
   }
 
   .panel-toggle {
@@ -841,7 +835,6 @@ html, body {
     display: flex;
   }
 
-  /* El hint queda dentro del área visible del mapa, no en el centro de la pantalla */
   .map-hint {
     bottom: 16px;
     left: 50%;
