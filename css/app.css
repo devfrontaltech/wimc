@@ -794,9 +794,10 @@ html, body {
     transform: translateY(100%);
   }
 
+  /* map-container llega hasta el borde del panel, sin hueco */
   .map-container {
     left: 0;
-    bottom: 55vh;
+    bottom: calc(55vh - 20px); /* -20px = border-radius del panel, elimina el gap */
     transition: bottom 0.3s ease;
   }
 
@@ -804,17 +805,20 @@ html, body {
     bottom: 0;
   }
 
+  /* La lengueta se sitúa justo encima del panel, pegada a él */
   .panel-toggle {
     top: auto;
     left: 50% !important;
-    bottom: 55vh;
+    bottom: calc(55vh - 20px);
     transform: translateX(-50%);
     width: 52px;
-    height: 20px;
-    border-radius: 6px 6px 0 0;
+    height: 22px;
+    border-radius: 8px 8px 0 0;
     border: 1px solid var(--border);
     border-bottom: none;
+    background: var(--surface);
     transition: bottom 0.3s ease, background 0.15s;
+    z-index: 1002;
   }
 
   .panel-toggle.collapsed {
@@ -833,8 +837,12 @@ html, body {
     display: flex;
   }
 
+  /* El hint queda dentro del área visible del mapa, no en el centro de la pantalla */
   .map-hint {
-    bottom: calc(55vh + 12px);
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    position: absolute;
   }
 
   .panel-search-results {
