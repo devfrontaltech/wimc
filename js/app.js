@@ -48,7 +48,6 @@ function initApp() {
 function initMap() {
   map = L.map("map", { zoomControl: false }).setView([40.416, -3.703], 6);
 
-  // Light tiles — much easier to read
   L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> © <a href="https://carto.com/">CARTO</a>',
     maxZoom: 19,
@@ -99,6 +98,7 @@ function buildPopup(car) {
     : "";
   return `
     <div class="popup-car-name" style="color:${car.color}">${car.name}</div>
+    ${p?.reference ? `<div class="popup-address" style="font-weight:500;color:var(--text)">${escHtml(p.reference)}</div>` : ""}
     <div class="popup-address">${p?.address || "Sin dirección"}</div>
     ${time ? `<div class="popup-time">Aparcado el ${time}</div>` : ""}
   `;
@@ -110,6 +110,27 @@ function refreshMarkers() {
   cars.forEach((car) => {
     if (car.parking) markers[car.id] = makeMarker(car);
   });
+}
+
+// ─────────────────────────────────────────────────────────
+//  Legend
+// ─────────────────────────────────────────────────────────
+function renderLegend() {
+  const legend = document.getElementById("map-legend");
+  const parked = cars.filter((c) => c.parking?.reference);
+
+  if (!parked.length) {
+    legend.classList.add("hidden");
+    return;
+  }
+
+  legend.classList.remove("hidden");
+  legend.innerHTML = parked.map((car) => `
+    <div class="legend-item">
+      <span class="legend-dot" style="background:${car.color}"></span>
+      <span class="legend-label">${escHtml(car.parking.reference)}</span>
+    </div>
+  `).join("");
 }
 
 // ─────────────────────────────────────────────────────────
@@ -202,6 +223,7 @@ function listenToCars() {
     renderCarsList();
     refreshMarkers();
     renderParkingInfo();
+    renderLegend();
     updateSaveBtn();
   });
 }
@@ -257,6 +279,7 @@ function renderParkingInfo() {
 
   info.innerHTML = `
     <div class="parking-detail">
+      ${p.reference ? `<div class="parking-address" style="color:var(--accent)">📍 ${escHtml(p.reference)}</div>` : ""}
       <div class="parking-address">${escHtml(p.address || "Sin dirección")}</div>
       ${time ? `<div class="parking-time">Aparcado el ${time}</div>` : ""}
       <div class="parking-coords">${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}</div>
@@ -306,8 +329,8 @@ function bindUI() {
     );
   });
 
-  // Logout — opens confirmation modal instead of acting directly
-  const openLogoutModal = () => document.getElementById("logout-modal-overlay").classList.remove("hidden");
+  // Logout modal
+  const openLogoutModal  = () => document.getElementById("logout-modal-overlay").classList.remove("hidden");
   const closeLogoutModal = () => document.getElementById("logout-modal-overlay").classList.add("hidden");
 
   document.getElementById("logout-btn").addEventListener("click", openLogoutModal);
@@ -321,6 +344,7 @@ function bindUI() {
     logoutUser();
   });
 
+  // Car modal
   document.getElementById("modal-close").addEventListener("click", closeCarModal);
   document.getElementById("car-modal-overlay").addEventListener("click", (e) => {
     if (e.target === e.currentTarget) closeCarModal();
@@ -328,11 +352,19 @@ function bindUI() {
   document.getElementById("modal-save-btn").addEventListener("click", saveCarModal);
   document.getElementById("modal-delete-btn").addEventListener("click", deleteCarModal);
 
+  // Confirm parking modal
   document.getElementById("confirm-modal-close").addEventListener("click", closeConfirmModal);
   document.getElementById("confirm-cancel-btn").addEventListener("click", closeConfirmModal);
   document.getElementById("confirm-save-btn").addEventListener("click", confirmSaveParking);
   document.getElementById("confirm-modal-overlay").addEventListener("click", (e) => {
     if (e.target === e.currentTarget) closeConfirmModal();
+  });
+
+  // Limpiar error del input de referencia al escribir
+  document.getElementById("confirm-reference-input").addEventListener("input", () => {
+    const input = document.getElementById("confirm-reference-input");
+    input.classList.remove("input-error");
+    input.closest(".field").classList.remove("field-error");
   });
 
   initSearch();
@@ -423,6 +455,13 @@ async function openConfirmModal(lat, lng) {
 
   document.getElementById("confirm-car-name").textContent = car?.name || "el coche";
   document.getElementById("confirm-address").textContent  = "Obteniendo dirección...";
+
+  // Limpiar y resetear el campo referencia
+  const refInput = document.getElementById("confirm-reference-input");
+  refInput.value = "";
+  refInput.classList.remove("input-error");
+  refInput.closest(".field").classList.remove("field-error");
+
   document.getElementById("confirm-modal-overlay").classList.remove("hidden");
 
   if (markers["_pending"]) markers["_pending"].remove();
@@ -434,6 +473,9 @@ async function openConfirmModal(lat, lng) {
   const address = await reverseGeocode(lat, lng);
   document.getElementById("confirm-address").textContent = address;
   pendingLatLng.address = address;
+
+  // Focus en el input de referencia una vez cargada la dirección
+  setTimeout(() => refInput.focus(), 50);
 }
 
 function closeConfirmModal() {
@@ -444,6 +486,17 @@ function closeConfirmModal() {
 
 async function confirmSaveParking() {
   if (!pendingLatLng || !selectedCarId) return;
+
+  // Validar referencia obligatoria
+  const refInput = document.getElementById("confirm-reference-input");
+  const reference = refInput.value.trim();
+  if (!reference) {
+    refInput.classList.add("input-error");
+    refInput.closest(".field").classList.add("field-error");
+    refInput.focus();
+    return;
+  }
+
   const btn = document.getElementById("confirm-save-btn");
   btn.disabled = true; btn.textContent = "Guardando...";
 
@@ -453,7 +506,8 @@ async function confirmSaveParking() {
       selectedCarId,
       pendingLatLng.lat,
       pendingLatLng.lng,
-      pendingLatLng.address || ""
+      pendingLatLng.address || "",
+      reference
     );
     closeConfirmModal();
   } catch {

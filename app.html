@@ -77,6 +77,8 @@
   <main class="map-container" id="map-container">
     <div id="map"></div>
 
+    <!-- Leyenda de referencias -->
+    <div class="map-legend hidden" id="map-legend"></div>
 
     <div class="map-hint hidden" id="map-hint">
       Pulsa en el mapa para aparcar el coche seleccionado
@@ -119,6 +121,10 @@
       </div>
       <p id="confirm-modal-text">¿Aparcar <strong id="confirm-car-name"></strong> en este punto?</p>
       <div id="confirm-address" class="confirm-address">Obteniendo dirección...</div>
+      <div class="field">
+        <label for="confirm-reference-input">Nombre de referencia</label>
+        <input type="text" id="confirm-reference-input" placeholder="Ej: Spar, Piscina, Casa abuela..." maxlength="40" />
+      </div>
       <div class="modal-actions">
         <button class="btn-secondary" id="confirm-cancel-btn">Cancelar</button>
         <button class="btn-primary" id="confirm-save-btn">Guardar</button>

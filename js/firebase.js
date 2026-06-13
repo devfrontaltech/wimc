@@ -97,9 +97,9 @@ export async function deleteCar(uid, carId) {
 
 // ─── PARKING ──────────────────────────────────────────────
 
-export async function saveParking(uid, carId, lat, lng, address) {
+export async function saveParking(uid, carId, lat, lng, address, reference) {
   await updateDoc(carDocRef(uid, carId), {
-    parking: { lat, lng, address, savedAt: Date.now() },
+    parking: { lat, lng, address, reference, savedAt: Date.now() },
   });
 }
 

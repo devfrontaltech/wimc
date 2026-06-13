@@ -462,6 +462,55 @@ html, body {
 
 .map-hint.hidden { opacity: 0; }
 
+/* ─── MAP LEGEND ──────────────────────────────────────── */
+
+.map-legend {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 500;
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: blur(6px);
+  border: 1.5px dashed #b0b4c0;
+  border-radius: 10px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 120px;
+  max-width: 200px;
+  pointer-events: none;
+}
+
+.map-legend:not(.hidden) {
+  display: flex;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #2a2d3a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ─── MODALS ──────────────────────────────────────────── */
 
 .modal-overlay {
@@ -567,6 +616,8 @@ html, body {
 
 .field input:focus { border-color: var(--accent); }
 .field input::placeholder { color: var(--text-muted); opacity: 0.6; }
+.field input.input-error { border-color: var(--error) !important; }
+.field.field-error label { color: var(--error); }
 
 /* ─── COLOR PICKER ────────────────────────────────────── */
 
