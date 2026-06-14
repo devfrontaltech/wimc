@@ -883,3 +883,62 @@ html, body {
 }
 
 .hidden { display: none !important; }
+/* ─── SPINNER RING ────────────────────────────────────── */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-spinner-ring {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+/* For dark/muted buttons (secondary, delete) */
+.btn-secondary .btn-spinner-ring,
+.btn-delete-parking .btn-spinner-ring {
+  border-color: rgba(139,144,168,0.35);
+  border-top-color: var(--text-muted);
+}
+
+/* Disabled state while loading */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ─── POPUP DIRECTIONS BUTTON ─────────────────────────── */
+
+.popup-directions-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 5px 10px;
+  background: var(--accent);
+  color: #fff !important;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.popup-directions-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.popup-directions-btn svg {
+  flex-shrink: 0;
+}
