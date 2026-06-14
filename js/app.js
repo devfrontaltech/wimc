@@ -119,7 +119,7 @@ function updateUserMarker(lat, lng) {
       radius:      9,
       color:       "#fff",
       weight:      2.5,
-      fillColor:   "#3b82f6",
+      fillColor:   "#0f1117",
       fillOpacity: 1,
       pane:        "markerPane",
     }).addTo(map);
