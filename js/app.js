@@ -19,6 +19,8 @@ let editingCarId   = null;
 let unsubCars      = null;
 let panelOpen      = true;
 let searchDebounce = null;
+let userMarker     = null;
+let watchId        = null;
 
 const CAR_COLORS = [
   "#3b82f6", "#ef4444", "#22c55e", "#f59e0b",
@@ -85,10 +87,18 @@ function initMap() {
   }).addTo(map);
 
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 15),
+    let firstFix = true;
+    watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        if (firstFix) {
+          map.setView([lat, lng], 15);
+          firstFix = false;
+        }
+        updateUserMarker(lat, lng);
+      },
       () => {},
-      { enableHighAccuracy: true, timeout: 6000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
     );
   }
 
@@ -99,6 +109,21 @@ function initMap() {
     }
     openConfirmModal(e.latlng.lat, e.latlng.lng);
   });
+}
+
+function updateUserMarker(lat, lng) {
+  if (userMarker) {
+    userMarker.setLatLng([lat, lng]);
+  } else {
+    userMarker = L.circleMarker([lat, lng], {
+      radius:      9,
+      color:       "#fff",
+      weight:      2.5,
+      fillColor:   "#3b82f6",
+      fillOpacity: 1,
+      pane:        "markerPane",
+    }).addTo(map);
+  }
 }
 
 function makeMarker(car) {
